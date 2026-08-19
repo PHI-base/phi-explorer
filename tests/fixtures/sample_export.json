@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "curation_sessions": {
+    "sess0001": {
+      "organisms": {
+        "90000": {"full_name": "Testus pathogenicus", "role": "pathogen"},
+        "90001": {"full_name": "Testus hostus", "role": "host"}
+      },
+      "genes": {
+        "Testus pathogenicus Q00001": {
+          "uniquename": "Q00001",
+          "organism": "Testus pathogenicus",
+          "uniprot_data": {"name": "geneA", "product": "putative secreted effector protein"}
+        },
+        "Testus pathogenicus Q00002": {
+          "uniquename": "Q00002",
+          "organism": "Testus pathogenicus",
+          "uniprot_data": {"name": "geneB", "product": "hypothetical protein"}
+        }
+      },
+      "alleles": {
+        "Q00001:sess0001-1": {
+          "gene": "Testus pathogenicus Q00001",
+          "name": "geneAdelta",
+          "allele_type": "deletion",
+          "description": "full deletion",
+          "synonyms": ["geneA-KO"]
+        },
+        "Q00002:sess0001-1": {
+          "gene": "Testus pathogenicus Q00002",
+          "name": "geneBdelta",
+          "allele_type": "deletion"
+        }
+      },
+      "genotypes": {
+        "sess0001-genotype-1": {
+          "organism_taxonid": 90000,
+          "organism_strain": "WT-1",
+          "loci": [[{"id": "Q00001:sess0001-1", "expression": "Not assayed"}]]
+        },
+        "sess0001-genotype-2": {
+          "organism_taxonid": 90000,
+          "organism_strain": "WT-1",
+          "loci": [[{"id": "Q00002:sess0001-1", "expression": "Not assayed"}]]
+        },
+        "sess0001-genotype-host": {
+          "organism_taxonid": 90001,
+          "organism_strain": "wild type",
+          "loci": []
+        }
+      },
+      "metagenotypes": {
+        "sess0001-metagenotype-1": {
+          "pathogen_genotype": "sess0001-genotype-1",
+          "host_genotype": "sess0001-genotype-host"
+        },
+        "sess0001-metagenotype-2": {
+          "pathogen_genotype": "sess0001-genotype-2",
+          "host_genotype": "sess0001-genotype-host"
+        }
+      },
+      "annotations": [
+        {
+          "type": "pathogen_host_interaction_phenotype",
+          "metagenotype": "sess0001-metagenotype-1",
+          "publication": "PMID:11111111",
+          "phi4_id": ["PHI:1"],
+          "extension": [
+            {"relation": "infective_ability", "rangeValue": "PHIPO:0000010", "rangeDisplayName": "loss of pathogenicity"},
+            {"relation": "infects_tissue", "rangeValue": "BTO:0000713", "rangeDisplayName": "leaf"}
+          ]
+        },
+        {
+          "type": "pathogen_host_interaction_phenotype",
+          "metagenotype": "sess0001-metagenotype-2",
+          "publication": "PMID:11111111",
+          "extension": [
+            {"relation": "infective_ability", "rangeValue": "PHIPO:0000004", "rangeDisplayName": "unaffected pathogenicity"}
+          ]
+        },
+        {
+          "type": "pathogen_phenotype",
+          "metagenotype": "sess0001-metagenotype-1",
+          "publication": "PMID:11111111",
+          "term": "PHIPO:0000015"
+        },
+        {
+          "type": "disease_name",
+          "metagenotype": "sess0001-metagenotype-1",
+          "publication": "PMID:11111111",
+          "term": "PHIDO:0000123"
+        },
+        {
+          "type": "cellular_component",
+          "gene": "Testus pathogenicus Q00001",
+          "publication": "PMID:11111111",
+          "term": "GO:0005576"
+        }
+      ],
+      "metadata": {"curation_pub_id": "PMID:11111111"},
+      "publications": {
+        "PMID:11111111": {
+          "title": "A test paper",
+          "pubmed_data": {"year": 2025},
+          "journal_abbr": "J. Test",
+          "author": "Tester A"
+        }
+      }
+    }
+  }
+}

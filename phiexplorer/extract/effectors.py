@@ -8,7 +8,8 @@ from collections import defaultdict
 import pandas as pd
 
 from phiexplorer.dereference import chain
-from phiexplorer.extract.phenotypes import INFECTIVE_ABILITY_TERMS, PHENOTYPE_COLS
+from phiexplorer.extract import _collect
+from phiexplorer.extract.phenotypes import PHENOTYPE_COLS
 
 EFFECTOR_KEYWORDS = ["effector", "avirulence", "avr", "virulence factor"]
 
@@ -55,24 +56,11 @@ def is_effector(product: str, annotation_terms: list[tuple[str, str]]) -> tuple[
 
 
 def _new_gene_record() -> dict:
-    return {
-        "uniprot_id": None,
-        "gene_name": None,
-        "product": None,
-        "phig_id": None,
-        "phi4_ids": set(),
-        "high_level_phenotypes": set(),
-        "pathogen_phenotype_terms": set(),
-        "host_species": set(),
-        "infected_tissues": set(),
-        "allele_types": set(),
-        "allele_names": set(),
-        "allele_descriptions": set(),
-        "go_biological_process": set(),
-        "go_molecular_function": set(),
-        "go_cellular_component": set(),
-        "pmids": set(),
-    }
+    gd = _collect.new_base_gene_record()
+    gd["go_biological_process"] = set()
+    gd["go_molecular_function"] = set()
+    gd["go_cellular_component"] = set()
+    return gd
 
 
 def _collect_gene_data(export: dict, taxid: int, sciname: str) -> tuple[dict[str, dict], dict[str, list]]:
@@ -80,44 +68,13 @@ def _collect_gene_data(export: dict, taxid: int, sciname: str) -> tuple[dict[str
     gene_annotations: dict[str, list] = defaultdict(list)
 
     for session in chain.sessions_with_organism(export, sciname):
-        genes = chain.genes_for_organism(session, sciname)
-        for uid, gene in genes.items():
-            gd = gene_data[uid]
-            if gd["uniprot_id"] is None:
-                gd["uniprot_id"] = uid
-                ud = gene.get("uniprot_data", {})
-                gd["gene_name"] = ud.get("name")
-                gd["product"] = ud.get("product")
-                gd["phig_id"] = gene.get("phig_id")
-
-        allele_to_gene = chain.allele_to_gene_map(session, sciname)
-        for allele_id, allele in session.get("alleles", {}).items():
-            uid = allele_to_gene.get(allele_id)
-            if uid is None:
-                continue
-            gd = gene_data[uid]
-            atype = allele.get("allele_type")
-            if atype and atype not in ("wild type", "wild_type"):
-                gd["allele_types"].add(atype)
-            name = allele.get("name")
-            if name:
-                gd["allele_names"].add(name)
-            description = allele.get("description")
-            if description:
-                gd["allele_descriptions"].add(description)
+        _collect.collect_gene_metadata(session, sciname, gene_data)
+        allele_to_gene = _collect.collect_allele_fields(session, sciname, gene_data)
 
         genotype_to_genes = chain.genotype_to_genes_map(session, taxid, allele_to_gene)
         metagenotype_to_genes = chain.metagenotype_to_genes_map(session, genotype_to_genes)
         taxid_to_name = chain.taxid_to_name_map(session)
-
-        for mg_id, mg in session.get("metagenotypes", {}).items():
-            uids = metagenotype_to_genes.get(mg_id)
-            if not uids:
-                continue
-            host_name = chain.host_species_for_metagenotype(session, mg, taxid_to_name)
-            if host_name:
-                for uid in uids:
-                    gene_data[uid]["host_species"].add(host_name)
+        _collect.collect_host_species(session, metagenotype_to_genes, taxid_to_name, gene_data)
 
         for ann in session.get("annotations", []):
             uids = chain.resolve_annotation_gene_ids(
@@ -127,32 +84,13 @@ def _collect_gene_data(export: dict, taxid: int, sciname: str) -> tuple[dict[str
                 continue
 
             ann_type = ann.get("type")
-            pmid = ann.get("publication")
-            phi4_ids = ann.get("phi4_id", [])
             term = ann.get("term")
 
             for uid in uids:
                 gene_annotations[uid].append(ann)
                 gd = gene_data[uid]
-                if pmid:
-                    gd["pmids"].add(pmid)
-                for p4 in phi4_ids:
-                    gd["phi4_ids"].add(p4)
-
-                if ann_type == "pathogen_host_interaction_phenotype":
-                    for ext in ann.get("extension", []):
-                        if ext.get("relation") == "infective_ability":
-                            label = ext.get("rangeDisplayName") or INFECTIVE_ABILITY_TERMS.get(
-                                ext.get("rangeValue"), ext.get("rangeValue")
-                            )
-                            gd["high_level_phenotypes"].add(label)
-                        elif ext.get("relation") == "infects_tissue":
-                            tissue = ext.get("rangeDisplayName")
-                            if tissue:
-                                gd["infected_tissues"].add(tissue)
-                elif ann_type == "pathogen_phenotype" and term:
-                    gd["pathogen_phenotype_terms"].add(term)
-                elif ann_type in _GO_FIELD_BY_TYPE and term:
+                _collect.apply_common_annotation_fields(ann, gd)
+                if ann_type in _GO_FIELD_BY_TYPE and term:
                     gd[_GO_FIELD_BY_TYPE[ann_type]].add(term)
 
     return dict(gene_data), dict(gene_annotations)
@@ -185,20 +123,7 @@ def _build_dataframe(effector_data: dict[str, dict]) -> pd.DataFrame:
         })
 
     df = pd.DataFrame(rows)
-    if df.empty:
-        return df
-
-    def phenotype_sort_key(hlp_str: str) -> int:
-        if not hlp_str:
-            return len(PHENOTYPE_COLS) + 1
-        for i, p in enumerate(PHENOTYPE_COLS):
-            if p in hlp_str:
-                return i
-        return len(PHENOTYPE_COLS)
-
-    df["_sort"] = df["high_level_phenotype"].map(phenotype_sort_key)
-    df = df.sort_values(["_sort", "uniprot_id"]).drop(columns="_sort").reset_index(drop=True)
-    return df
+    return _collect.sort_by_phenotype_priority(df, PHENOTYPE_COLS)
 
 
 def extract_effector_proteins(export: dict, taxid: int, sciname: str) -> pd.DataFrame:

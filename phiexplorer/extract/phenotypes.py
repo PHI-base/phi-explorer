@@ -10,8 +10,6 @@ import pandas as pd
 from phiexplorer.dereference import chain
 from phiexplorer.extract import _collect
 
-INFECTIVE_ABILITY_TERMS = _collect.INFECTIVE_ABILITY_TERMS
-
 PHENOTYPE_COLS = [
     "loss of pathogenicity",
     "reduced virulence",

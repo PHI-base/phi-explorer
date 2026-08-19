@@ -63,6 +63,9 @@ phi-explorer/
 │   ├── DATA-STRUCTURE.md   # ported/updated from PHI5-zenodo-datamining's guide
 │   ├── PORTING-NOTES.md    # provenance: what came from James Seager's work
 │   └── superpowers/specs/  # this file and future specs
+├── content-links/
+│   └── data-index.md       # pointer note: where the input data lives, size, provenance (see §5)
+├── output/                  # generated reports (gitignored)
 ├── AGENTS.md                # tool-agnostic source of truth (Claude Code, OpenCode, etc.)
 ├── CLAUDE.md                 # thin bridge to AGENTS.md
 ├── README.md
@@ -95,19 +98,49 @@ phiexplorer/
 
 ## 5. Data handling
 
-The PHI-base v5.3 JSON export (110MB) is **not committed to git** — same
-principle as phi-weaver's external literature storage.
+The PHI-base v5.3 JSON export (110MB) is **not committed to git**, and not
+stored inside the vault folder either — same principle as phi-weaver's
+external literature storage, adapted to keep phi-explorer self-contained
+(its own data, not a live reference into another project's folder).
 
-- Source of truth: the Zenodo release referenced in the official
-  `phi-base_v5.3/README.md` (DOI 10.5281/zenodo.18449986), also mirrored
-  locally in ResearchLab at
-  `PRO-PHI-base/PRO-PHI-base5/phi-base_v5.3/phi-base_v5.3.json`.
-  Location is overridable via a `PHI_DATA_ROOT` environment variable
-  (mirrors phi-weaver's `PHI_LITERATURE_ROOT`), so the code isn't tied to a
-  machine-specific path.
+**No symlink/plugin bridge.** A past BotVault session tried symlinking into
+a vault on this same `/mnt/z` mount and hit `Operation not permitted` (9p/
+drvfs doesn't support symlinks) — so an Obsidian plugin that bridges an
+external folder via a symlink would fail here too. phi-weaver's proven
+mechanism is plainer and is what phi-explorer follows: a `content-links/`
+folder inside the vault holding lightweight markdown *pointer* notes (paths,
+sizes, provenance — no plugin, no symlink), while the actual bytes live
+outside the vault root entirely so Obsidian never indexes them.
+
+**Layout:**
+
+```
+/mnt/z/
+├── phi-explorer/              ← repo + vault (self-contained: code, docs, notes)
+│   └── content-links/
+│       └── data-index.md      ← pointer note: where the data lives, size, provenance
+└── phi-explorer-data/         ← sibling folder, phi-explorer's OWN copy (not ResearchLab's)
+    └── input/                 ← phi-base_v5.3.json / .xlsx
+```
+
+- `PHI_DATA_ROOT` (mirrors phi-weaver's `PHI_LITERATURE_ROOT`) defaults to
+  `../phi-explorer-data/`, so the code isn't tied to a machine-specific
+  path and can be pointed elsewhere per-machine.
+- The input is a **one-time copy** seeded from the Zenodo release (DOI
+  10.5281/zenodo.18449986, per the official `phi-base_v5.3/README.md`) or
+  from the existing ResearchLab mirror
+  (`PRO-PHI-base/PRO-PHI-base5/phi-base_v5.3/`) — copied once, not kept in
+  sync. This is a third copy of the 115MB dataset on disk; accepted as the
+  cost of phi-explorer not depending on another project's folder.
+- `content-links/data-index.md` documents this location, the copy date,
+  and the source DOI/path it was seeded from, so it's discoverable from
+  inside the vault without the actual bytes being there.
 - `phiexplorer.repo_root()`-relative paths only; never hardcode
   `/mnt/z/...` in package code (same rule phi-weaver enforces).
 - Tests run against a small fixture subset of the JSON, not the full file.
+- **Output** (generated reports) stays inside the repo at `output/`,
+  gitignored — small Excel/CSV files, useful to browse next to the code
+  that produced them, no need to externalize.
 
 ## 6. Initial scope and build order
 

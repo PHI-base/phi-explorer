@@ -64,6 +64,8 @@ where it lives and how `PHI_DATA_ROOT` finds it.
 
 - [docs/FAQ.md](docs/FAQ.md) — practical how-to: installation, data setup, extracting
   data, generating reports, common gotchas
+- [docs/BACKLOG.md](docs/BACKLOG.md) — open items not yet scheduled as a plan (the query
+  CLI, some parked review findings, possible future extraction dimensions)
 - [AGENTS.md](AGENTS.md) — project overview, mission, coding standards (the
   canonical agent-facing doc)
 - [docs/DATA-STRUCTURE.md](docs/DATA-STRUCTURE.md) — the PHI-base v5.3 JSON

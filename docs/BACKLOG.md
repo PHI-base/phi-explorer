@@ -1,0 +1,67 @@
+# Backlog
+
+Open items, not yet scheduled as a plan. When one of these gets picked up, it goes through
+the normal brainstorming → spec → plan → subagent-driven-development cycle like everything
+else in this repo — this file is just the "what's left" list.
+
+## Query CLI
+
+Explicitly deferred twice already: the original design spec (§6) scoped it out of v1, and the
+reports-layering follow-up's spec (§2) reaffirmed the deferral rather than expanding into it.
+It's the one piece of originally-planned scope that's still genuinely missing — everything else
+the design spec called for now exists.
+
+What it'd need:
+- An entry point (likely `python3 -m phiexplorer.cli` or similar) wrapping
+  `extract_protein_phenotypes`, `extract_effector_proteins`, and the three
+  `reports/generate.py` writers.
+- Organism lookup ergonomics — right now every caller needs to already know both the exact
+  scientific name string *and* the NCBI taxon ID (see `docs/FAQ.md`'s "What organism do I
+  use" entry). A CLI probably wants to resolve one from the other, or at least validate them
+  against what's actually in the loaded export before running an extraction that silently
+  returns zero rows for a typo'd name.
+- Decide output-to-stdout vs. output-to-file default, and how `--output-dir` maps to the
+  existing `output_dir` parameter.
+
+## Smaller open items
+
+All previously reviewed and explicitly parked as non-blocking — listed here so they don't get
+lost, not because any of them are urgent.
+
+- **`phiexplorer/dereference/chain.py:97`** — `taxid_to_name_map()` uses `org["full_name"]`
+  (bracket access) where the rest of the file uses `.get()`. Cosmetic; would only matter if an
+  organism entry is ever missing `full_name`, which the current fixture and design don't
+  exercise. (Flagged in the core-toolkit plan's final review.)
+- **Test file structure inconsistency** — `tests/dereference/__init__.py` exists but
+  `tests/extract/` and `tests/reports/` don't have one. Harmless (pytest doesn't need it, test
+  basenames are unique across the suite) but worth normalizing one way or the other.
+- **`phiexplorer/extract/_collect.py`'s `INFECTIVE_ABILITY_TERMS` fallback path and the
+  wild-type allele filter have zero test coverage** — the fixture's data always short-circuits
+  both (every `infective_ability` extension already has a `rangeDisplayName`, and both fixture
+  alleles are `"deletion"`, never `"wild type"`). Two small hand-built test cases would close
+  it. (Flagged in the extract-consolidation plan's final review.)
+- **`_organism_slug()` in `phiexplorer/reports/generate.py` doesn't neutralize path-hostile
+  characters** (e.g. a `/` in a scientific name would break the output path). Hardening, not a
+  live bug — PHI-base's actual fungal/bacterial organism names don't produce this today.
+  (Flagged in the reports-layering plan's final review.)
+- **`reports/` isn't benchmark-validated against real data the way `extract/` is via
+  `phiexplorer/smoke.py`.** The reports-layering plan's manual real-data verification step did
+  confirm the report files reproduce the correct numbers, but that wasn't turned into a
+  permanent regression check. A `smoke.py` extension asserting actual output-file row counts
+  (not just the DataFrame the writer wraps) would close this properly.
+
+## Possible future extraction dimensions
+
+Not committed to — these are "Common Extensions" the ported prior-art workflow doc
+(`PHI_ANALYSIS_WORKFLOW.md`, in James Seager's original `PHI5-zenodo-datamining` project) named
+as future directions, never built here. Worth a fresh brainstorming pass each if they turn out
+to matter:
+
+- **Cross-species comparative analysis** — organism-wise summary tables, comparing phenotype
+  distributions or host ranges across multiple organisms in one call, rather than one organism
+  at a time.
+- **Temporal analysis** — curation trends over time via `metadata.accepted_timestamp` and
+  publication year, tracking how curation of a topic has grown.
+- **Effector protein cross-referencing** — the current `is_effector()` rules are keyword +
+  GO-term based; the original workflow doc also suggested cross-referencing against UniProt's
+  own secreted-protein predictions, not yet implemented.

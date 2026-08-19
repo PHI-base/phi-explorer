@@ -17,6 +17,22 @@ spec (§2).
   identification keyword/GO-term lists (`EFFECTOR_KEYWORDS`, `SECRETION_KEYWORDS`,
   `EFFECTOR_GO_TERMS`) are dataset-wide constants in the original, not
   organism-specific, so they're kept as-is.
+
+  **A bug fix, not just a port.** The original's `is_effector_protein(gene_data,
+  annotations)` read `gene_data.get("uniprot_data", {}).get("product", "")` —
+  but the aggregated `gene_data` dict it was called with only ever has a flat
+  `"product"` key, never a nested `"uniprot_data"` key. So `product` was always
+  the empty string, and the keyword-based rules (matching "effector", "secreted",
+  etc. in the product name) never actually fired; only the GO-term-based matches
+  ever worked. phiexplorer's `is_effector(product, annotation_terms)` (in
+  `phiexplorer/extract/effectors.py`) takes `product` directly as a parameter,
+  so the keyword rules now work correctly. On the real dataset, this makes a
+  measurable difference for *Fusarium graminearum* (taxid 5518): phiexplorer
+  finds **22** effector proteins vs. the original script's committed output of
+  **19** — a strict superset; the 3 additional hits (I1RI44, I1RVG3, Q6WER3)
+  are correct matches under the stated keyword/GO rules that the original's bug
+  prevented it from finding. This is tracked as a benchmark check in
+  `phiexplorer/smoke.py` (`EXPECTED_EFFECTOR_COUNT = 22`).
 - **`PHI5-zenodo-datamining/DATA_STRUCTURE_GUIDE.md`** -> ported and updated into
   `docs/DATA-STRUCTURE.md`, with the dereferencing-chain code turned into named,
   tested functions in `phiexplorer/dereference/chain.py` instead of inline
@@ -35,8 +51,11 @@ Both `fg_protein_phenotypes.py` and `fg_effector_proteins.py` contained an
 header row) and near-identical session/gene/allele/genotype/metagenotype
 extraction boilerplate. phiexplorer factors the shared extraction steps into
 `phiexplorer/dereference/chain.py` and the shared Excel export into
-`phiexplorer/reports/excel.py`, used by both `extract/phenotypes.py` and
-`extract/effectors.py`.
+`phiexplorer/reports/excel.py`'s `write_excel()`. `write_excel()` exists as
+that deduplicated helper, ready for a future report-generation script to call;
+it currently has no callers in package code (`extract/phenotypes.py` and
+`extract/effectors.py` return DataFrames and don't call it themselves — only
+`tests/reports/test_excel.py` exercises it today).
 
 ## What was NOT ported
 
@@ -61,6 +80,10 @@ checks it reproduces the original script's validated output:
 | Unaffected pathogenicity | 912 |
 | Increased virulence | 15 |
 | Top host | *Triticum aestivum* (wheat) |
+
+`phiexplorer/smoke.py` also re-runs `extract_effector_proteins()` for the same
+organism and checks it finds **22** effector proteins (see the bug-fix note
+above).
 
 ## A schema/reality discrepancy worth knowing
 

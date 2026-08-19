@@ -12,8 +12,11 @@ depends on the other.
 ## Status
 
 Early development. Core extraction (`phiexplorer/dereference/`,
-`phiexplorer/extract/`) and reporting (`phiexplorer/reports/`) are implemented and
-validated against a F. graminearum benchmark. No query CLI yet (planned).
+`phiexplorer/extract/`) and reporting (`phiexplorer/reports/`) are implemented.
+The phenotype extraction path (`extract/phenotypes.py`) and the effector
+extraction path (`extract/effectors.py`) are validated against a F. graminearum
+benchmark via `python3 -m phiexplorer.smoke`; `phiexplorer/reports/` is not yet
+benchmark-validated. No query CLI yet (planned).
 
 ## Installation
 

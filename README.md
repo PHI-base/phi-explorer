@@ -40,6 +40,20 @@ df = extract_protein_phenotypes(export, taxid=5518, sciname="Fusarium graminearu
 print(df.head())
 ```
 
+### Generating report files
+
+To write extraction results straight to a file instead of working with the DataFrame directly:
+
+```python
+from phiexplorer.reports.generate import write_protein_phenotype_report
+
+path = write_protein_phenotype_report(export, taxid=5518, sciname="Fusarium graminearum")
+print(f"Wrote {path}")
+```
+
+`write_effector_report` and `write_dataset_summary_report` follow the same pattern. Files are
+written to `output/` by default (gitignored) with a timestamped filename.
+
 ## Where the data lives
 
 The PHI-base v5.3 JSON export isn't in this repo (110MB, and not something git

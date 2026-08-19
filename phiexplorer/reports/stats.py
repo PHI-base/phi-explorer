@@ -86,13 +86,13 @@ def dataset_summary(export: dict) -> pd.DataFrame:
 
 def organism_summary(export: dict, taxid: int, sciname: str) -> dict[str, int]:
     """Gene and unique-interaction counts for a single organism."""
-    gene_count = 0
+    genes: set = set()
     interactions: set = set()
 
     for session in chain.sessions_with_organism(export, sciname):
-        for gene in session.get("genes", {}).values():
+        for gene_id, gene in session.get("genes", {}).items():
             if gene.get("organism") == sciname:
-                gene_count += 1
+                genes.add(gene_id)
 
         for mg in session.get("metagenotypes", {}).values():
             pathogen_genotype = session["genotypes"][mg["pathogen_genotype"]]
@@ -100,4 +100,4 @@ def organism_summary(export: dict, taxid: int, sciname: str) -> dict[str, int]:
                 continue
             interactions.add(_metagenotype_key(mg, session))
 
-    return {"genes": gene_count, "interactions": len(interactions)}
+    return {"genes": len(genes), "interactions": len(interactions)}

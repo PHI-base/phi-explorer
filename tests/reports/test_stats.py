@@ -35,3 +35,38 @@ def test_dataset_summary(export):
 def test_organism_summary(export):
     result = organism_summary(export, 90000, "Testus pathogenicus")
     assert result == {"genes": 2, "interactions": 2}
+
+
+def test_organism_summary_dedupes_gene_seen_in_multiple_sessions():
+    """A gene curated in two separate sessions must be counted once, not once
+    per session (regression test for the organism_summary over-count bug).
+    """
+    export = {
+        "curation_sessions": {
+            "sessA": {
+                "organisms": {
+                    "90000": {"full_name": "Testus pathogenicus", "role": "pathogen"},
+                },
+                "genes": {
+                    "Testus pathogenicus Q00001": {
+                        "uniquename": "Q00001",
+                        "organism": "Testus pathogenicus",
+                    },
+                },
+            },
+            "sessB": {
+                "organisms": {
+                    "90000": {"full_name": "Testus pathogenicus", "role": "pathogen"},
+                },
+                "genes": {
+                    "Testus pathogenicus Q00001": {
+                        "uniquename": "Q00001",
+                        "organism": "Testus pathogenicus",
+                    },
+                },
+            },
+        },
+    }
+
+    result = organism_summary(export, 90000, "Testus pathogenicus")
+    assert result["genes"] == 1

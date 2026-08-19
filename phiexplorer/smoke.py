@@ -21,6 +21,7 @@ EXPECTED_PHENOTYPES = {
     "unaffected pathogenicity": 912,
     "increased virulence": 15,
 }
+EXPECTED_EFFECTOR_COUNT = 22
 
 
 def run_unit_tests() -> bool:
@@ -31,13 +32,19 @@ def run_unit_tests() -> bool:
     return result.returncode == 0
 
 
-def run_benchmark_check() -> bool:
+def run_benchmark_check() -> bool | None:
+    """Run the F. graminearum benchmark checks against the real dataset.
+
+    Returns True/False for pass/fail, or None if the benchmark was skipped
+    because the dataset isn't available.
+    """
+    from phiexplorer.extract.effectors import extract_effector_proteins
     from phiexplorer.extract.phenotypes import extract_protein_phenotypes
 
     path = input_json_path()
     if not path.exists():
         print(f"Skipping benchmark check: {path} not found (set PHI_DATA_ROOT)")
-        return True
+        return None
 
     print(f"Loading {path} ...")
     with open(path, encoding="utf-8") as f:
@@ -55,6 +62,14 @@ def run_benchmark_check() -> bool:
         ok = ok and match
         print(f"  {label}: {actual} (expected {expected}) {'OK' if match else 'MISMATCH'}")
 
+    effector_df = extract_effector_proteins(export, taxid=FG_TAXID, sciname=FG_SCINAME)
+    effector_match = len(effector_df) == EXPECTED_EFFECTOR_COUNT
+    ok = ok and effector_match
+    print(
+        f"F. graminearum effector proteins found: {len(effector_df)} "
+        f"(expected {EXPECTED_EFFECTOR_COUNT}) {'OK' if effector_match else 'MISMATCH'}"
+    )
+
     return ok
 
 
@@ -62,10 +77,15 @@ if __name__ == "__main__":
     print("Running unit tests...")
     tests_ok = run_unit_tests()
     print("\nRunning F. graminearum benchmark check...")
-    benchmark_ok = run_benchmark_check()
+    benchmark_result = run_benchmark_check()
+    benchmark_skipped = benchmark_result is None
+    benchmark_ok = True if benchmark_skipped else benchmark_result
 
     if tests_ok and benchmark_ok:
-        print("\nSmoke check PASSED")
+        if benchmark_skipped:
+            print(f"\nSmoke check PASSED (benchmark SKIPPED — no dataset at {input_json_path()})")
+        else:
+            print("\nSmoke check PASSED")
         sys.exit(0)
     else:
         print("\nSmoke check FAILED")

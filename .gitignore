@@ -1,0 +1,26 @@
+# Obsidian — per-machine config, each user configures their own
+.obsidian/
+
+# Claude memory/cache — personal interaction history
+.claude/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# PHI-base data exports — large (110MB+), sourced from Zenodo, not committed
+# (see docs/superpowers/specs/2026-08-19-phi-explorer-design.md §5)
+*.xlsx
+phi-base_v5*.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+*~
+*.bak
+*.swp

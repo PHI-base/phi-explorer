@@ -52,10 +52,10 @@ header row) and near-identical session/gene/allele/genotype/metagenotype
 extraction boilerplate. phiexplorer factors the shared extraction steps into
 `phiexplorer/dereference/chain.py` and the shared Excel export into
 `phiexplorer/reports/excel.py`'s `write_excel()`. `write_excel()` exists as
-that deduplicated helper, ready for a future report-generation script to call;
-it currently has no callers in package code (`extract/phenotypes.py` and
-`extract/effectors.py` return DataFrames and don't call it themselves — only
-`tests/reports/test_excel.py` exercises it today).
+that deduplicated helper, and is now called by two report-generation functions
+in `phiexplorer/reports/generate.py`: `write_protein_phenotype_report()` and
+`write_effector_report()` both use it to export DataFrames to Excel files. It is
+also covered by `tests/reports/test_excel.py`.
 
 ## What was NOT ported
 

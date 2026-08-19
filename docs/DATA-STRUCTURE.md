@@ -78,7 +78,7 @@ For pathogen-host interaction analysis:
 ### High-level phenotype extraction
 
 Look for `extension` entries where `relation == "infective_ability"`
-(`phiexplorer.extract.phenotypes.INFECTIVE_ABILITY_TERMS`):
+(mapped internally in `phiexplorer/extract/_collect.py`):
 
 ```python
 {

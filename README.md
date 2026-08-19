@@ -1,0 +1,71 @@
+# phi-explorer
+
+Datamining toolkit for pathogen-host interaction data in the published
+**[PHI-base 5](http://phi-base.org/)** database.
+
+phi-explorer is a sibling project to
+[phi-weaver](https://github.com/PHI-base/phi-weaver): phi-weaver assists curators in
+*creating* new PHI-base annotations from literature; phi-explorer *reads* the
+already-published database to extract and report on interaction data. Neither
+depends on the other.
+
+## Status
+
+Early development. Core extraction (`phiexplorer/dereference/`,
+`phiexplorer/extract/`) and reporting (`phiexplorer/reports/`) are implemented and
+validated against a F. graminearum benchmark. No query CLI yet (planned).
+
+## Installation
+
+```bash
+pip install -e ".[dev]"
+```
+
+Requires Python >= 3.11.
+
+## Quick start
+
+```python
+import json
+from phiexplorer.paths import input_json_path
+from phiexplorer.extract.phenotypes import extract_protein_phenotypes
+
+with open(input_json_path(), encoding="utf-8") as f:
+    export = json.load(f)
+
+df = extract_protein_phenotypes(export, taxid=5518, sciname="Fusarium graminearum")
+print(df.head())
+```
+
+## Where the data lives
+
+The PHI-base v5.3 JSON export isn't in this repo (110MB, and not something git
+should carry). See [content-links/data-index.md](content-links/data-index.md) for
+where it lives and how `PHI_DATA_ROOT` finds it.
+
+## Documentation
+
+- [AGENTS.md](AGENTS.md) — project overview, mission, coding standards (the
+  canonical agent-facing doc)
+- [docs/DATA-STRUCTURE.md](docs/DATA-STRUCTURE.md) — the PHI-base v5.3 JSON
+  dereferencing chain
+- [docs/PORTING-NOTES.md](docs/PORTING-NOTES.md) — provenance: what this project
+  ported from James Seager's prior work, and what was generalized
+- [docs/superpowers/specs/](docs/superpowers/specs/) — design specs
+
+## Testing
+
+```bash
+python3 -m pytest tests/ -v
+```
+
+For an end-to-end check against the real dataset (requires `PHI_DATA_ROOT` data):
+
+```bash
+python3 -m phiexplorer.smoke
+```
+
+## License
+
+See [LICENSE](LICENSE). Data license terms are separate — see PHI-base's own
+[data license](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0).

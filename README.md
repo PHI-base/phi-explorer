@@ -62,6 +62,8 @@ where it lives and how `PHI_DATA_ROOT` finds it.
 
 ## Documentation
 
+- [docs/FAQ.md](docs/FAQ.md) — practical how-to: installation, data setup, extracting
+  data, generating reports, common gotchas
 - [AGENTS.md](AGENTS.md) — project overview, mission, coding standards (the
   canonical agent-facing doc)
 - [docs/DATA-STRUCTURE.md](docs/DATA-STRUCTURE.md) — the PHI-base v5.3 JSON

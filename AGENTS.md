@@ -27,6 +27,10 @@ modifies the other.
   Gene -> Allele -> Genotype -> Metagenotype -> Annotation dereferencing chain used
   throughout `phiexplorer/dereference/chain.py`.
 - Design spec: [docs/superpowers/specs/2026-08-19-phi-explorer-design.md](docs/superpowers/specs/2026-08-19-phi-explorer-design.md).
+- Practical how-to (installation, data setup, extracting data, generating reports, common
+  gotchas): [docs/FAQ.md](docs/FAQ.md). When a recurring question gets resolved, add a short
+  Q/A there rather than re-explaining it in a session — a lookup layer over the canonical
+  docs, keep answers short, don't duplicate.
 
 ## 2. Mission & Boundaries
 

@@ -93,3 +93,21 @@ v5.3 export — and both validated source scripts — treat it as a **list**.
 `phiexplorer/dereference/chain.py` and the test fixture
 (`tests/fixtures/sample_export.json`) follow the validated (list) behaviour, not
 the formal schema description.
+
+## Extract module consolidation (follow-up, 2026-08-19)
+
+The original port (above) left `extract/phenotypes.py` and `extract/effectors.py`'s
+internal collector functions ~87% duplicated — flagged as deferred finding #4 in the
+original plan's final review, and judged a plan-authoring defect rather than an
+implementer defect (the original plan's own reference code contained the duplication).
+
+This was consolidated into `phiexplorer/extract/_collect.py`: six shared functions
+(`new_base_gene_record`, `collect_gene_metadata`, `collect_allele_fields`,
+`collect_host_species`, `apply_common_annotation_fields`, `sort_by_phenotype_priority`)
+factor out the identical traversal/aggregation steps, while each module keeps its own
+`_collect_gene_data`/`_build_dataframe` for its divergent extras (`allele_synonyms`/
+`expression_levels` for phenotypes; `gene_annotations` tracking and `go_*` fields for
+effectors). Public function signatures and behavior are unchanged — verified by the
+existing test suites passing without modification, and by `phiexplorer/smoke.py`'s
+real-data benchmarks (1344 F. graminearum proteins, 32/421/912/15 phenotype split, 22
+effectors) continuing to match exactly.

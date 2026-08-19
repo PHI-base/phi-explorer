@@ -4,6 +4,9 @@
 # Claude memory/cache — personal interaction history
 .claude/
 
+# Superpowers subagent-driven-development scratch workspace (ledgers, briefs, reviews)
+.superpowers/
+
 # Python
 __pycache__/
 *.pyc

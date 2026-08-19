@@ -20,6 +20,9 @@ env/
 *.xlsx
 phi-base_v5*.json
 
+# Generated reports (Excel, CSV with timestamps) — output/ directory
+output/
+
 # OS / editor
 .DS_Store
 Thumbs.db

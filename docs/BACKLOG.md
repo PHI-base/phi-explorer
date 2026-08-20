@@ -4,25 +4,6 @@ Open items, not yet scheduled as a plan. When one of these gets picked up, it go
 the normal brainstorming → spec → plan → subagent-driven-development cycle like everything
 else in this repo — this file is just the "what's left" list.
 
-## Query CLI
-
-Explicitly deferred twice already: the original design spec (§6) scoped it out of v1, and the
-reports-layering follow-up's spec (§2) reaffirmed the deferral rather than expanding into it.
-It's the one piece of originally-planned scope that's still genuinely missing — everything else
-the design spec called for now exists.
-
-What it'd need:
-- An entry point (likely `python3 -m phiexplorer.cli` or similar) wrapping
-  `extract_protein_phenotypes`, `extract_effector_proteins`, and the three
-  `reports/generate.py` writers.
-- Organism lookup ergonomics — right now every caller needs to already know both the exact
-  scientific name string *and* the NCBI taxon ID (see `docs/FAQ.md`'s "What organism do I
-  use" entry). A CLI probably wants to resolve one from the other, or at least validate them
-  against what's actually in the loaded export before running an extraction that silently
-  returns zero rows for a typo'd name.
-- Decide output-to-stdout vs. output-to-file default, and how `--output-dir` maps to the
-  existing `output_dir` parameter.
-
 ## Smaller open items
 
 All previously reviewed and explicitly parked as non-blocking — listed here so they don't get

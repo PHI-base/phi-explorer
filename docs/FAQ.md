@@ -104,11 +104,30 @@ resolution for you, it just filters the export by exact match on both.
 
 ## Is there a command-line interface?
 
-Not yet — phi-explorer is library-functions-only for now (see the design spec's explicit
-deferral in
-[docs/superpowers/specs/2026-08-19-phi-explorer-design.md](superpowers/specs/2026-08-19-phi-explorer-design.md)
-§6, reaffirmed in the reports-layering follow-up's spec §2). Everything above is meant to be
-called from a Python script or notebook.
+Yes — `python3 -m phiexplorer.cli`, covering the same operations as the Python API above.
+`--input PATH` (before the subcommand) overrides which export JSON is loaded; every
+subcommand defaults to `phiexplorer.paths.input_json_path()`.
+
+```bash
+# Discover what's in the loaded export
+python3 -m phiexplorer.cli organisms
+
+# Write a protein phenotype report (by taxid or sciname)
+python3 -m phiexplorer.cli phenotypes --taxid 5518
+python3 -m phiexplorer.cli effectors --sciname "Fusarium graminearum"
+
+# Dataset-wide and per-organism summaries
+python3 -m phiexplorer.cli summary
+python3 -m phiexplorer.cli organism-summary --taxid 5518
+```
+
+`phenotypes`/`effectors`/`summary` write timestamped files under `output/` by default
+(override with `--output-dir`) and print the path written; `organisms` and
+`organism-summary` print directly to stdout. If a `--taxid`/`--sciname` pair doesn't
+match anything in the loaded export — a typo, or the wrong export loaded — the CLI exits
+1 with a clear `error: ...` message rather than silently producing an empty report. See
+[docs/superpowers/specs/2026-08-20-phi-explorer-cli-design.md](superpowers/specs/2026-08-20-phi-explorer-cli-design.md)
+for the full design.
 
 ## How do I verify everything is working?
 

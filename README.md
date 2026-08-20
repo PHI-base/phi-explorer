@@ -12,11 +12,11 @@ depends on the other.
 ## Status
 
 Early development. Core extraction (`phiexplorer/dereference/`,
-`phiexplorer/extract/`) and reporting (`phiexplorer/reports/`) are implemented.
-The phenotype extraction path (`extract/phenotypes.py`) and the effector
-extraction path (`extract/effectors.py`) are validated against a F. graminearum
-benchmark via `python3 -m phiexplorer.smoke`; `phiexplorer/reports/` is not yet
-benchmark-validated. No query CLI yet (planned).
+`phiexplorer/extract/`), reporting (`phiexplorer/reports/`), and a query CLI
+(`phiexplorer/cli.py`) are implemented. The phenotype extraction path
+(`extract/phenotypes.py`) and the effector extraction path (`extract/effectors.py`)
+are validated against a F. graminearum benchmark via `python3 -m phiexplorer.smoke`;
+`phiexplorer/reports/` is not yet benchmark-validated.
 
 ## Installation
 
@@ -53,6 +53,17 @@ print(f"Wrote {path}")
 
 `write_effector_report` and `write_dataset_summary_report` follow the same pattern. Files are
 written to `output/` by default (gitignored) with a timestamped filename.
+
+### Using the CLI
+
+The same operations are available from the command line:
+
+```bash
+python3 -m phiexplorer.cli phenotypes --taxid 5518
+```
+
+See [docs/FAQ.md](docs/FAQ.md#is-there-a-command-line-interface) for the full subcommand
+list.
 
 ## Where the data lives
 

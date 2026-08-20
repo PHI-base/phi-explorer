@@ -13,13 +13,23 @@ import sys
 from pathlib import Path
 
 from phiexplorer import paths
-from phiexplorer.dereference.chain import all_organisms
-from phiexplorer.reports.generate import write_dataset_summary_report
+from phiexplorer.dereference.chain import all_organisms, resolve_organism
+from phiexplorer.reports.generate import (
+    write_dataset_summary_report,
+    write_effector_report,
+    write_protein_phenotype_report,
+)
+from phiexplorer.reports.stats import organism_summary
 
 
 def _load_export(input_path: Path) -> dict:
     with open(input_path, encoding="utf-8") as f:
         return json.load(f)
+
+
+def _add_organism_args(subparser: argparse.ArgumentParser) -> None:
+    subparser.add_argument("--taxid", type=int, default=None)
+    subparser.add_argument("--sciname", default=None)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -40,6 +50,23 @@ def build_parser() -> argparse.ArgumentParser:
     summary_parser = subparsers.add_parser("summary", help="Write a dataset-wide summary report")
     summary_parser.add_argument("--output-dir", type=Path, default=None)
 
+    phenotypes_parser = subparsers.add_parser(
+        "phenotypes", help="Write a protein phenotype report for one organism"
+    )
+    _add_organism_args(phenotypes_parser)
+    phenotypes_parser.add_argument("--output-dir", type=Path, default=None)
+
+    effectors_parser = subparsers.add_parser(
+        "effectors", help="Write an effector protein report for one organism"
+    )
+    _add_organism_args(effectors_parser)
+    effectors_parser.add_argument("--output-dir", type=Path, default=None)
+
+    organism_summary_parser = subparsers.add_parser(
+        "organism-summary", help="Print gene/interaction counts for one organism"
+    )
+    _add_organism_args(organism_summary_parser)
+
     return parser
 
 
@@ -55,6 +82,25 @@ def run(args: argparse.Namespace) -> None:
     if args.command == "summary":
         path = write_dataset_summary_report(export, args.output_dir)
         print(path)
+        return
+
+    if args.command == "phenotypes":
+        taxid, sciname = resolve_organism(export, args.taxid, args.sciname)
+        path = write_protein_phenotype_report(export, taxid, sciname, args.output_dir)
+        print(path)
+        return
+
+    if args.command == "effectors":
+        taxid, sciname = resolve_organism(export, args.taxid, args.sciname)
+        path = write_effector_report(export, taxid, sciname, args.output_dir)
+        print(path)
+        return
+
+    if args.command == "organism-summary":
+        taxid, sciname = resolve_organism(export, args.taxid, args.sciname)
+        result = organism_summary(export, taxid, sciname)
+        print(f"genes\t{result['genes']}")
+        print(f"interactions\t{result['interactions']}")
         return
 
     raise ValueError(f"unhandled command: {args.command}")

@@ -14,6 +14,7 @@ __pycache__/
 .venv/
 venv/
 env/
+*.egg-info/
 
 # PHI-base data exports — large (110MB+), sourced from Zenodo, not committed
 # (see docs/superpowers/specs/2026-08-19-phi-explorer-design.md §5)

@@ -25,6 +25,19 @@ lost, not because any of them are urgent.
   characters** (e.g. a `/` in a scientific name would break the output path). Hardening, not a
   live bug — PHI-base's actual fungal/bacterial organism names don't produce this today.
   (Flagged in the reports-layering plan's final review.)
+- **No dataset-wide phenotype-extraction helper** — `extract_protein_phenotypes()` takes one
+  organism at a time; a dataset-wide analysis (e.g. "phenotype counts across all organisms")
+  has to loop over `chain.all_organisms()` and concatenate results by hand, as done in
+  `Data-analysis-MU/2026-08-20-all-organisms-high-level-phenotype-counts.md`. A
+  `extract_all_organisms_phenotypes()`-style wrapper would close this.
+- **29 UniProt IDs are curated under two or more different organism entries** in the v5.3
+  export (e.g. the effector `avrB`/P13835 under both *Pseudomonas syringae* and *Pseudomonas
+  savastanoi*; `SIX3`/Q2A0P1 under four different fungal genera). Confirmed by inspecting the
+  raw duplicate rows — looks like shared/ambiguous strain assignment or genuine cross-referenced
+  orthologs in PHI-base's own curation, not an extraction bug, but any dataset-wide aggregation
+  by UniProt ID must group/dedupe across organisms or it will overcount (see the same analysis
+  note above). Not something to "fix" in phiexplorer; flagged here so future dataset-wide code
+  doesn't rediscover it the hard way.
 - **`reports/` isn't benchmark-validated against real data the way `extract/` is via
   `phiexplorer/smoke.py`.** The reports-layering plan's manual real-data verification step did
   confirm the report files reproduce the correct numbers, but that wasn't turned into a

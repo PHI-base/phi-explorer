@@ -59,6 +59,45 @@ release from Zenodo (DOI in `content-links/data-index.md`) or copy it from where
 keeps a mirror, then either place it at the default sibling path or set `PHI_DATA_ROOT` to
 wherever you put it.
 
+## What are all these top-level folders, and which ones matter?
+
+phi-explorer is a git repo *and* an Obsidian vault at the same path, so Obsidian's file
+explorer shows everything — code, docs, and per-machine config alike. Here's what's actually
+there and why:
+
+**The project itself (in git, what you're actually working on):**
+
+| Folder/file | What it is |
+|---|---|
+| `phiexplorer/` | The installable Python package — `dereference/`, `extract/`, `reports/`, `cli.py`. This *is* the project. |
+| `tests/` | The test suite (`python3 -m pytest tests/ -v`). |
+| `docs/` | Everything else written about the project — this FAQ, `BACKLOG.md`, `DATA-STRUCTURE.md`, `PORTING-NOTES.md`, session logs, and the `superpowers/` specs/plans from how features here get designed and built. |
+| `content-links/` | Pointer notes for data that lives outside the vault (see above) — not the data itself, just where to find it and its provenance. |
+| `AGENTS.md` / `CLAUDE.md` | Agent-facing instructions — `AGENTS.md` is the tool-agnostic source of truth, `CLAUDE.md` bridges Claude Code to it. |
+| `README.md`, `LICENSE`, `pyproject.toml`, `.gitignore` | Standard project files. |
+
+**Generated, gitignored, safe to delete any time (they regenerate):**
+
+| Folder | What it is |
+|---|---|
+| `output/` | Timestamped Excel/CSV reports from `write_*_report()` — see [Are generated report files committed to git?](#are-generated-report-files-committed-to-git) below. |
+| `__pycache__/` | Python's compiled-bytecode cache, written on every import — see the next question if you want it redirected off the vault entirely. |
+| `*.egg-info/` | Build metadata from `pip install -e .`. Only appears if you've run that; empty/missing is normal otherwise. |
+| `.pytest_cache/` | Disabled entirely for this repo (see `pyproject.toml`) — you shouldn't see this one at all. |
+
+**Per-machine config, gitignored, not shared or committed by design:**
+
+| Folder | What it is |
+|---|---|
+| `.obsidian/` | This vault's Obsidian settings (plugins, appearance) — personal to whoever's editing, never synced via git. |
+| `.claude/` | Claude Code's local project state for this repo. |
+| `.superpowers/` | Scratch workspace for in-progress `superpowers:subagent-driven-development` plan execution (ledgers, task briefs, review packages) — deleted automatically once a plan's final review is clean, so it's usually empty or absent. |
+| `.trash/` | **Obsidian's own trash** — where it moves notes you delete from inside the app (not OS-level delete). This one currently is *not* covered by `.gitignore`, which is a real gap worth fixing if you're accumulating deleted notes here; ask if you'd like that added. |
+
+The one thing genuinely *not* visible here: the actual 110MB PHI-base dataset lives one level
+up, in a sibling `phi-explorer-data/` folder outside the vault root entirely — Obsidian never
+indexes it, which is deliberate (see the data question above).
+
 ## How do I extract protein phenotype data for an organism?
 
 ```python

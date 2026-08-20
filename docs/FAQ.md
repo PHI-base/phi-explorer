@@ -102,6 +102,11 @@ already know the taxid for an organism you're interested in, look it up on
 [NCBI Taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) — phi-explorer doesn't do name
 resolution for you, it just filters the export by exact match on both.
 
+If you're calling the CLI (see below), you only need to know one of the two — `python3 -m
+phiexplorer.cli organisms` lists every organism in the loaded export, and any subcommand that
+takes `--taxid`/`--sciname` will resolve the other half for you (case-insensitive exact match on
+name), erroring clearly if it can't find a match.
+
 ## Is there a command-line interface?
 
 Yes — `python3 -m phiexplorer.cli`, covering the same operations as the Python API above.

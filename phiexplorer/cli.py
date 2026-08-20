@@ -34,7 +34,7 @@ def _add_organism_args(subparser: argparse.ArgumentParser) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="phiexplorer",
+        prog="python3 -m phiexplorer.cli",
         description="Query PHI-base v5.3 export data: phenotypes, effectors, and summaries.",
     )
     parser.add_argument(

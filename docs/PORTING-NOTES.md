@@ -64,7 +64,6 @@ also covered by `tests/reports/test_excel.py`.
   v5.0-specific script isn't ported, only its organism-agnostic stats logic.
 - `/mnt/z/PHI5` (legacy PHI-base **4** parsing scripts) — predates the v5 schema
   entirely, unrelated to this port.
-- A query CLI — deferred (see design spec §6).
 
 ## Validation benchmark
 

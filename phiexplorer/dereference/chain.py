@@ -105,3 +105,47 @@ def resolve_annotation_gene_ids(
         if gene_key.startswith(prefix):
             return {gene_key[len(prefix):]}
     return set()
+
+
+def all_organisms(export: dict) -> dict[int, str]:
+    """Return {taxid: full_name} for every organism across all curation sessions."""
+    organisms: dict[int, str] = {}
+    for session in export.get("curation_sessions", {}).values():
+        organisms.update(taxid_to_name_map(session))
+    return organisms
+
+
+def resolve_organism(
+    export: dict, taxid: int | None = None, sciname: str | None = None
+) -> tuple[int, str]:
+    """Resolve a (taxid, sciname) pair from either half, validated against `export`.
+
+    - Both given: validated against all_organisms(); raises ValueError if they
+      don't refer to the same organism.
+    - Only one given: the other is looked up. sciname matching is case-insensitive
+      exact match. Raises ValueError if not found, or if a sciname matches more
+      than one taxid.
+    - Neither given: raises ValueError.
+    """
+    if taxid is None and sciname is None:
+        raise ValueError("must provide --taxid, --sciname, or both")
+
+    organisms = all_organisms(export)
+
+    if taxid is not None:
+        resolved_name = organisms.get(taxid)
+        if resolved_name is None:
+            raise ValueError(f"no organism with taxid {taxid} found in the loaded export")
+        if sciname is not None and resolved_name.lower() != sciname.lower():
+            raise ValueError(
+                f"taxid {taxid} is '{resolved_name}' in the loaded export, not '{sciname}'"
+            )
+        return taxid, resolved_name
+
+    matches = [(t, name) for t, name in organisms.items() if name.lower() == sciname.lower()]
+    if not matches:
+        raise ValueError(f"no organism named '{sciname}' found in the loaded export")
+    if len(matches) > 1:
+        candidates = ", ".join(f"{t} ({name})" for t, name in matches)
+        raise ValueError(f"'{sciname}' matches multiple organisms: {candidates}")
+    return matches[0]

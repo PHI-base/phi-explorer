@@ -88,3 +88,70 @@ def test_resolve_annotation_gene_ids_gene(session):
     ann = session["annotations"][4]
     uids = chain.resolve_annotation_gene_ids(ann, {}, {}, "Testus pathogenicus")
     assert uids == {"Q00001"}
+
+
+def test_all_organisms(export):
+    assert chain.all_organisms(export) == {
+        90000: "Testus pathogenicus",
+        90001: "Testus hostus",
+    }
+
+
+def test_resolve_organism_by_taxid(export):
+    assert chain.resolve_organism(export, taxid=90000) == (90000, "Testus pathogenicus")
+
+
+def test_resolve_organism_by_sciname(export):
+    result = chain.resolve_organism(export, sciname="Testus pathogenicus")
+    assert result == (90000, "Testus pathogenicus")
+
+
+def test_resolve_organism_by_sciname_case_insensitive(export):
+    result = chain.resolve_organism(export, sciname="testus PATHOGENICUS")
+    assert result == (90000, "Testus pathogenicus")
+
+
+def test_resolve_organism_both_given_consistent(export):
+    result = chain.resolve_organism(export, taxid=90000, sciname="Testus pathogenicus")
+    assert result == (90000, "Testus pathogenicus")
+
+
+def test_resolve_organism_both_given_mismatched(export):
+    with pytest.raises(ValueError, match="not 'Testus hostus'"):
+        chain.resolve_organism(export, taxid=90000, sciname="Testus hostus")
+
+
+def test_resolve_organism_unknown_taxid(export):
+    with pytest.raises(ValueError, match="no organism with taxid 1 "):
+        chain.resolve_organism(export, taxid=1)
+
+
+def test_resolve_organism_unknown_sciname(export):
+    with pytest.raises(ValueError, match="no organism named"):
+        chain.resolve_organism(export, sciname="Nonexistent species")
+
+
+def test_resolve_organism_neither_given(export):
+    with pytest.raises(ValueError, match="must provide"):
+        chain.resolve_organism(export)
+
+
+def test_resolve_organism_ambiguous_sciname():
+    """Defensive case: two taxids sharing one display name (shouldn't happen in
+    real PHI-base data, but resolve_organism must not silently pick one)."""
+    export = {
+        "curation_sessions": {
+            "sessA": {
+                "organisms": {
+                    "90000": {"full_name": "Testus pathogenicus", "role": "pathogen"},
+                },
+            },
+            "sessB": {
+                "organisms": {
+                    "90002": {"full_name": "Testus pathogenicus", "role": "pathogen"},
+                },
+            },
+        },
+    }
+    with pytest.raises(ValueError, match="matches multiple organisms"):
+        chain.resolve_organism(export, sciname="Testus pathogenicus")

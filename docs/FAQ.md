@@ -182,6 +182,25 @@ No. `output/` is gitignored entirely (covers Excel and CSV alike). Regenerate re
 time by calling the `write_*_report()` functions again — nothing about them is meant to be
 checked in.
 
+## Can I keep `__pycache__/` folders out of the repo directory (so they don't clutter Obsidian's file view)?
+
+They're already gitignored, so they're never committed — but they're real files on disk, in
+`phiexplorer/__pycache__/`, `tests/__pycache__/`, etc., and this repo is also an Obsidian vault,
+so they do show up in the file explorer. If that bothers you, redirect Python's bytecode cache
+entirely outside the repo with an environment variable (one-time, per machine, matches how
+`PHI_DATA_ROOT` keeps the dataset out of the repo too):
+
+```bash
+export PYTHONPYCACHEPREFIX="$HOME/.cache/phiexplorer-pycache"
+```
+
+Add that to your shell profile (`.bashrc`/`.zshrc`) and every `.pyc` file lands under
+`~/.cache/phiexplorer-pycache/` (mirroring the source tree) instead of next to the source —
+nothing else changes. `.pytest_cache/` is handled separately and doesn't need this: the
+`[tool.pytest.ini_options]` setting in `pyproject.toml` disables pytest's cache provider
+entirely (it also intermittently failed to write on this repo's `/mnt/z` SMB mount), so that
+folder is never created at all.
+
 ## What's the difference between "high-level phenotype" and "pathogen phenotype"?
 
 High-level phenotype (`pathogen_host_interaction_phenotype` annotations) is the coarse

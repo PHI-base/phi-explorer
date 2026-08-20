@@ -4,6 +4,31 @@ Practical answers for using phi-explorer. This is a lookup layer over the canoni
 short answers with pointers, not a re-explanation. If you're reading code and something's
 still unclear, [docs/DATA-STRUCTURE.md](DATA-STRUCTURE.md) has the full data-shape reference.
 
+## Quick searches from the command line
+
+Just want to look something up, no Python required? These assume you've already installed
+phi-explorer and have the PHI-base data in place (see the next two questions if not).
+
+```bash
+# Find an organism (fuzzy: grep the list)
+python3 -m phiexplorer.cli organisms | grep -i fusarium
+
+# Get everything known about an organism's phenotypes
+python3 -m phiexplorer.cli phenotypes --sciname "Fusarium graminearum"
+
+# Find its effector proteins
+python3 -m phiexplorer.cli effectors --sciname "Fusarium graminearum"
+
+# Quick gene/interaction counts for one organism
+python3 -m phiexplorer.cli organism-summary --sciname "Fusarium graminearum"
+
+# Whole-dataset overview
+python3 -m phiexplorer.cli summary
+```
+
+See [Is there a command-line interface?](#is-there-a-command-line-interface) below for the
+full flag reference (`--taxid`, `--output-dir`, `--input`, error behavior).
+
 ## What is phi-explorer, and how is it different from phi-weaver?
 
 phi-explorer *reads* the already-published PHI-base 5 database and extracts/reports on

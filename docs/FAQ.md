@@ -92,7 +92,7 @@ there and why:
 | `.obsidian/` | This vault's Obsidian settings (plugins, appearance) — personal to whoever's editing, never synced via git. |
 | `.claude/` | Claude Code's local project state for this repo. |
 | `.superpowers/` | Scratch workspace for in-progress `superpowers:subagent-driven-development` plan execution (ledgers, task briefs, review packages) — deleted automatically once a plan's final review is clean, so it's usually empty or absent. |
-| `.trash/` | **Obsidian's own trash** — where it moves notes you delete from inside the app (not OS-level delete). This one currently is *not* covered by `.gitignore`, which is a real gap worth fixing if you're accumulating deleted notes here; ask if you'd like that added. |
+| `.trash/` | **Obsidian's own trash** — where it moves notes you delete from inside the app (not OS-level delete). |
 
 The one thing genuinely *not* visible here: the actual 110MB PHI-base dataset lives one level
 up, in a sibling `phi-explorer-data/` folder outside the vault root entirely — Obsidian never

@@ -1,5 +1,6 @@
 # Obsidian — per-machine config, each user configures their own
 .obsidian/
+.trash/
 
 # Claude memory/cache — personal interaction history
 .claude/
